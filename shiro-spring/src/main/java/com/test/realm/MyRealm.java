@@ -107,8 +107,10 @@ public class MyRealm extends AuthorizingRealm implements InitializingBean {
 	@Override
 	protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
 		System.out.println("MyRealm [" + hashAlgorithmName + "] doGetAuthorizationInfo...");
+
 		Set<String> roles = new HashSet<>();
 
+		//从 PrincipalCollection 中获取登录用户的信息，再从数据库中查询用户的角色
 		Object principal = principals.getPrimaryPrincipal();
 		for (User user : userList) {
 			if (principal.equals(user.getUsername())) {

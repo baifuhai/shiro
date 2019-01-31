@@ -35,6 +35,7 @@
         <!--<property name="realm" ref="myRealm"/>-->
 
         <property name="authenticator" ref="authenticator"/>
+
         <!--realms可以写在authenticator里-->
         <property name="realms">
             <list>
@@ -165,6 +166,7 @@
         <property name="loginUrl" value="/loginPage"/>
         <property name="successUrl" value="/"/>
         <property name="unauthorizedUrl" value="/unauthorized"/>
+
         <!-- The 'filters' property is not necessary since any declared javax.servlet.Filter bean
              defined will be automatically acquired and available via its beanName in chain
              definitions, but you can perform overrides or parent/child consolidated configuration
@@ -210,6 +212,7 @@
         <property name="filterChainDefinitionMap" ref="filterChainDefinitionMapFactoryBean"/>
     </bean>
 
+    <!-- 配置一个bean，该bean实际上是一个Map，通过实例工厂方法的方式获取 -->
     <!--<bean id="filterChainDefinitionMap" factory-bean="filterChainDefinitionMapFactory" factory-method="getBean"/>
     <bean id="filterChainDefinitionMapFactory" class="com.test.config.FilterChainDefinitionMapFactory"/>-->
 

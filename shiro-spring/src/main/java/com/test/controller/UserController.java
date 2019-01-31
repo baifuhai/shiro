@@ -22,17 +22,17 @@ public class UserController {
     UserService userService;
 
     @RequestMapping("login")
-    public String login(String username, String password, Map<String, Object> map) {
+    public String login(String username, String password/*, Map<String, Object> map*/) {
         Subject currentUser = SecurityUtils.getSubject();
         if (!currentUser.isAuthenticated()) {
             UsernamePasswordToken token = new UsernamePasswordToken(username, password);
+            token.setRememberMe(true);
             try {
                 currentUser.login(token);
-                token.setRememberMe(true);
             } catch (AuthenticationException e) {
                 e.printStackTrace();
-                map.put("message", e.getMessage());
-                return "redirect:/loginPage";
+                //map.put("message", e.getMessage());
+                //return "redirect:/loginPage";
             }
         }
         return "redirect:/index";
