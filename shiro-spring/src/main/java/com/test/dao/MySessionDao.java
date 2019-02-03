@@ -19,9 +19,6 @@ public class MySessionDao extends EnterpriseCacheSessionDAO {
     protected Serializable doCreate(Session session) {
         Serializable sessionId = super.doCreate(session);
 
-        System.out.println(sessionId);
-        System.out.println(session.getId());
-
         String sql = "insert into sessions(id, session) values(?, ?)";
         jdbcTemplate.update(sql, sessionId, MySerializationUtil.serialize(session));
 

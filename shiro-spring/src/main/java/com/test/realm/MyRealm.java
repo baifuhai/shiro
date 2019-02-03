@@ -47,7 +47,7 @@ public class MyRealm extends AuthorizingRealm implements InitializingBean {
 	public String encryptPassword(String username, String password) {
 		Object credentials = password;
 		Object salt = ByteSource.Util.bytes(username);
-		return new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations).toString();
+		return new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations).toHex();
 	}
 
 	//用于认证的方法
@@ -58,13 +58,13 @@ public class MyRealm extends AuthorizingRealm implements InitializingBean {
 		//1. 把 AuthenticationToken 转换为 UsernamePasswordToken
 		UsernamePasswordToken upToken = (UsernamePasswordToken) authenticationToken;
 
-		//2. 从 UsernamePasswordToken 中来获取 username
+		//2. 从 UsernamePasswordToken 中获取 username
 		String username = upToken.getUsername();
 
-		//3. 调用数据库的方法, 从数据库中查询 username 对应的用户记录
+		//3. 调用数据库的方法，从数据库中查询 username 对应的用户记录
 		//List<User> userList = getUserList();
 
-		//4. 若用户不存在, 则可以抛出 UnknownAccountException 异常
+		//4. 若用户不存在，则抛出 UnknownAccountException 异常
 		boolean flag = false;
 		User user2 = null;
 		for (User user : userList) {
@@ -78,14 +78,13 @@ public class MyRealm extends AuthorizingRealm implements InitializingBean {
 			throw new UnknownAccountException("用户不存在");
 		}
 
-		//5. 根据用户信息的情况, 决定是否需要抛出其他的 AuthenticationException 异常
+		//5. 抛出其他的 AuthenticationException 异常
 		if (user2.isLocked()) {
 			throw new LockedAccountException("用户被锁定");
 		}
 
-		//6. 根据用户的情况, 来构建 AuthenticationInfo 对象并返回. 通常使用的实现类为: SimpleAuthenticationInfo
-		//以下信息是从数据库中获取的
-		//1). principal: 认证的实体信息. 可以是 username, 也可以是数据表对应的用户的实体类对象
+		//6. 构建 AuthenticationInfo 对象并返回，通常使用的实现类 SimpleAuthenticationInfo
+		//1). principal: 认证的实体信息，可以是 username，也可以是数据表对应的用户的实体类对象
 		Object principal = username;
 
 		//2). credentials: 密码
@@ -94,7 +93,7 @@ public class MyRealm extends AuthorizingRealm implements InitializingBean {
 		//3). 盐值
 		ByteSource credentialsSalt = ByteSource.Util.bytes(username);
 
-		//4). realmName: 当前 realm 对象的 name. 调用父类的 getName() 方法即可
+		//4). realmName: 当前 realm 对象的 name，调用父类的 getName() 方法即可
 		String realmName = getName();
 
 		//SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(principal, credentials, realmName);

@@ -129,7 +129,7 @@
          2) even know which Shiro objects require these methods to be
             called. -->
     <!--
-        4. 配置 LifecycleBeanPostProcessor. 可以自定的来调用配置在 Spring IOC 容器中 shiro bean 的生命周期方法
+        4. 配置 LifecycleBeanPostProcessor. 可以自动调用配置在 Spring IOC 容器中 shiro bean 的生命周期方法
     -->
     <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
 
@@ -187,7 +187,7 @@
         	url使用 Ant 风格模式
             通配符支持 ?、* 、 **，注意通配符匹配不包括目录分隔符“/”：
                 ?：匹配一个字符，如 /admin? 将匹配 /admin1，但不匹配 /admin 或 /admin/
-                *：匹配零个或多个字符串，如 /admin 将匹配 /admin、/admin123，但不匹配 /admin/1
+                *：匹配零个或多个字符串，如 /admin* 将匹配 /admin、/admin123，但不匹配 /admin/1
                 **：匹配路径中的零个或多个路径，如 /admin/** 将匹配 /admin/a 或 /admin/a/b
             采取第一次匹配优先的方式，从上往下匹配，匹配到即返回，不再向下匹配
         -->
