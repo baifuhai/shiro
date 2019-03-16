@@ -39,8 +39,8 @@
         <!--realms可以写在authenticator里-->
         <property name="realms">
             <list>
-                <ref bean="myRealmMD5"></ref>
-                <ref bean="myRealmSHA1"></ref>
+                <ref bean="myRealmMD5"/>
+                <ref bean="myRealmSHA1"/>
             </list>
         </property>
 
@@ -119,6 +119,11 @@
         </property>
     </bean>
 
+    <bean class="com.test.util.MyPasswordSaltUtil">
+        <property name="hashAlgorithmName" value="MD5"/>
+        <property name="hashIterations" value="1024"/>
+    </bean>
+
     <!-- =========================================================
          Shiro Spring-specific integration
          ========================================================= -->
@@ -164,7 +169,7 @@
         <property name="securityManager" ref="securityManager"/>
 
         <property name="loginUrl" value="/loginPage"/>
-        <property name="successUrl" value="/"/>
+        <!--<property name="successUrl" value="/"/>-->
         <property name="unauthorizedUrl" value="/unauthorized"/>
 
         <!-- The 'filters' property is not necessary since any declared javax.servlet.Filter bean
@@ -172,9 +177,11 @@
              definitions, but you can perform overrides or parent/child consolidated configuration
              here if you like: -->
         <!-- <property name="filters">
-            <util:map>
-                <entry key="aName" value-ref="someFilterPojo"/>
-            </util:map>
+            <map>
+                <entry key="authc">
+                    <bean class="com.test.filter.MyFilter"/>
+                </entry>
+            </map>
         </property> -->
 
         <!--

@@ -1,6 +1,7 @@
 package com.test.realm;
 
 import com.test.bean.User;
+import com.test.service.UserService;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -11,43 +12,26 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
-import org.apache.shiro.crypto.hash.SimpleHash;
-import org.apache.shiro.realm.AuthenticatingRealm;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.util.ByteSource;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class MyRealm extends AuthorizingRealm implements InitializingBean {
 
 	private String hashAlgorithmName;
-	private int hashIterations;
 
-	private List<User> userList;
+	@Autowired
+	private UserService userService;
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		HashedCredentialsMatcher hashedCredentialsMatcher = ((HashedCredentialsMatcher) getCredentialsMatcher());
-
+		HashedCredentialsMatcher hashedCredentialsMatcher = (HashedCredentialsMatcher) getCredentialsMatcher();
 		hashAlgorithmName = hashedCredentialsMatcher.getHashAlgorithmName();
-		hashIterations = hashedCredentialsMatcher.getHashIterations();
-
-		userList = new ArrayList<>();
-		userList.add(new User("admin", encryptPassword("admin", "admin"), false, Arrays.asList("admin", "user")));
-		userList.add(new User("user1", encryptPassword("user1", "123"), false, Arrays.asList("user")));
-		userList.add(new User("user2", encryptPassword("user2", "123"), true, Arrays.asList("user")));
-	}
-
-	public String encryptPassword(String username, String password) {
-		Object credentials = password;
-		Object salt = ByteSource.Util.bytes(username);
-		return new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations).toHex();
 	}
 
 	//用于认证的方法
@@ -62,24 +46,15 @@ public class MyRealm extends AuthorizingRealm implements InitializingBean {
 		String username = upToken.getUsername();
 
 		//3. 调用数据库的方法，从数据库中查询 username 对应的用户记录
-		//List<User> userList = getUserList();
+		User user = userService.getByUsername(username);
 
 		//4. 若用户不存在，则抛出 UnknownAccountException 异常
-		boolean flag = false;
-		User user2 = null;
-		for (User user : userList) {
-			if (username.equals(user.getUsername())) {
-				flag = true;
-				user2 = user;
-				break;
-			}
-		}
-		if (!flag) {
+		if (user == null) {
 			throw new UnknownAccountException("用户不存在");
 		}
 
 		//5. 抛出其他的 AuthenticationException 异常
-		if (user2.isLocked()) {
+		if (user.isLocked()) {
 			throw new LockedAccountException("用户被锁定");
 		}
 
@@ -88,7 +63,7 @@ public class MyRealm extends AuthorizingRealm implements InitializingBean {
 		Object principal = username;
 
 		//2). credentials: 密码
-		Object credentials = user2.getPassword();
+		Object credentials = user.getPassword();
 
 		//3). 盐值
 		ByteSource credentialsSalt = ByteSource.Util.bytes(username);
@@ -107,15 +82,9 @@ public class MyRealm extends AuthorizingRealm implements InitializingBean {
 	protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
 		System.out.println("MyRealm [" + hashAlgorithmName + "] doGetAuthorizationInfo...");
 
-		Set<String> roles = new HashSet<>();
-
 		//从 PrincipalCollection 中获取登录用户的信息，再从数据库中查询用户的角色
 		Object principal = principals.getPrimaryPrincipal();
-		for (User user : userList) {
-			if (principal.equals(user.getUsername())) {
-				roles.addAll(user.getRoles());
-			}
-		}
+		Set<String> roles = new HashSet<>(userService.getRolesByUsername(principal.toString()));
 
 		return new SimpleAuthorizationInfo(roles);
 	}
